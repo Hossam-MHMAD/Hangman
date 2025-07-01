@@ -1,14 +1,26 @@
 import pygame
 import sys
 pygame.font.init()
+from words import words
+import random
+import os
 
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 900, 600
+
+WORDS_LEN = len(words)
+
+HANGMAN_IMGS = [pygame.image.load('images/'+img) for img in os.listdir('images/')]
 
 FPS = 60
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
 main_font = pygame.font.SysFont('comicsans', 30)
+current_img = 0
+
+spaces_pos = []
+
+letters_player_get = []
 
 class Letters:
 	def __init__(self):
@@ -20,7 +32,7 @@ class Letters:
 		
 
 	def draw(self, window):
-		letter_x, letter_y = 90, 450
+		letter_x, letter_y = 130, 450
 
 		for i in range(len(self.letters_surfaces)):
 			'''
@@ -35,7 +47,7 @@ class Letters:
 
 			if i == 12: # Do Another Row
 				letter_y += 50
-				letter_x = 90
+				letter_x = 130
 			else:
 				letter_x += 50
 		
@@ -50,15 +62,50 @@ class Letters:
 
 letters = Letters()
 
-def draw(window, letters):
+def draw(window, letters, hangman_img, letters_player_get, add):
 	letters.draw(window)
+	window.blit(hangman_img, (120, 200))
 
+	start_x, end_x = 370, 400
+	for l in word:
+		rect = pygame.draw.line(window, 'black', (start_x, 300), (end_x, 300), 3)
+		if add:
+			spaces_pos.append(rect)
+			add = False
+		start_x += 40
+		end_x += 40
+		
+
+	for surf, pos in range(len(letters_player_get)):
+		window.blit(surf, (pos.x, pos.y - 50))
+
+def choose_random_word():
+	while True:
+		if len(words[random.randint(0, WORDS_LEN-1)]) >= 13:
+			return words[random.randint(0, WORDS_LEN-1)]
+
+def creat_empty_spaces(word):
+	for l in word:
+		pygame.draw.line()
+
+def check_letter(player_letter, current_img):
+	letter_indices = []
+	if player_letter in word:
+		letter_indices = [i for i, letter in enumerate(word) if letter[i] == player_letter]
+	else:
+		current_img += 1
+
+	for l_index in letter_indices:
+		letters_player_get.append((main_font.render(player_letter, 1, 'black'), spaces_pos[l_index]))
+
+word = choose_random_word()
+add = True
 
 while True:
 
 	WIN.fill((255, 255, 255))
 
-	draw(WIN, letters)
+	draw(WIN, letters, HANGMAN_IMGS[current_img], letters_player_get, add)
 
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
@@ -73,7 +120,7 @@ while True:
 			mouse_pos = pygame.mouse.get_pos()
 			for rect, letter in letters.letters_rects:
 				if rect.collidepoint(mouse_pos):
-					print(letter)
+					check_letter(letter, current_img)
 
 	clock.tick(FPS)
 	pygame.display.update()
