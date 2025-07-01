@@ -76,7 +76,7 @@ def draw(window, letters, hangman_img, letters_player_get, add):
 		end_x += 40
 		
 
-	for surf, pos in range(len(letters_player_get)):
+	for surf, pos in letters_player_get:
 		window.blit(surf, (pos.x, pos.y - 50))
 
 def choose_random_word():
@@ -84,14 +84,10 @@ def choose_random_word():
 		if len(words[random.randint(0, WORDS_LEN-1)]) >= 13:
 			return words[random.randint(0, WORDS_LEN-1)]
 
-def creat_empty_spaces(word):
-	for l in word:
-		pygame.draw.line()
-
-def check_letter(player_letter, current_img):
+def check_letter(word, player_letter, current_img):
 	letter_indices = []
 	if player_letter in word:
-		letter_indices = [i for i, letter in enumerate(word) if letter[i] == player_letter]
+		letter_indices = [i for i, letter in enumerate(word) if word[i] == player_letter]
 	else:
 		current_img += 1
 
@@ -120,7 +116,7 @@ while True:
 			mouse_pos = pygame.mouse.get_pos()
 			for rect, letter in letters.letters_rects:
 				if rect.collidepoint(mouse_pos):
-					check_letter(letter, current_img)
+					check_letter(word, letter, current_img)
 
 	clock.tick(FPS)
 	pygame.display.update()
