@@ -16,6 +16,7 @@ class Letters:
 		self.letters_surfaces = [main_font.render(letter, 1, 'black') for letter in self.letters] # using assci to draw letters
 		self.circles_center = []
 		self.letters_rects = [] # this hold a tuple of (rect, letter)
+		self.add = True
 		
 
 	def draw(self, window):
@@ -29,7 +30,8 @@ class Letters:
 			'''
 
 			window.blit(self.letters_surfaces[i], (letter_x, letter_y))
-			self.circles_center.append(self.letters_surfaces[i].get_rect(topleft=(letter_x, letter_y)).center)
+			if self.add:
+				self.circles_center.append(self.letters_surfaces[i].get_rect(topleft=(letter_x, letter_y)).center)
 
 			if i == 12: # Do Another Row
 				letter_y += 50
@@ -37,12 +39,14 @@ class Letters:
 			else:
 				letter_x += 50
 		
-		self.draw_letters_edges(window)
+		self.draw_letters_edges(window, self.add)
+		self.add = False
 
-	def draw_letters_edges(self, window):
+	def draw_letters_edges(self, window, add):
 		for i in range(len(self.circles_center)):
 			rect = pygame.draw.circle(window, 'black', self.circles_center[i], 20, 3, True, True, True, True)
-			self.letters_rects.append((rect, self.letters[i]))
+			if add:
+				self.letters_rects.append((rect, self.letters[i]))
 
 letters = Letters()
 
@@ -64,7 +68,12 @@ while True:
 			if event.key == pygame.K_ESCAPE:
 				pygame.quit()
 				sys.exit()
-			
+
+		if event.type == pygame.MOUSEBUTTONDOWN:
+			mouse_pos = pygame.mouse.get_pos()
+			for rect, letter in letters.letters_rects:
+				if rect.collidepoint(mouse_pos):
+					print(letter)
 
 	clock.tick(FPS)
 	pygame.display.update()
